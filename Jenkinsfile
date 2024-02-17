@@ -21,12 +21,12 @@ pipeline {
                  echo  "this is terraform  apply "
             }
         }
-        stages("stage 4"){
+        stage("stage 4"){
             steps{
                  sh " terraform  apply -auto-approve"
             }
         }
-        stages("stage 5"){
+        stage("stage 5"){
             steps{
                 echo "  this is stage 5"
             }
