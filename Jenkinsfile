@@ -1,5 +1,9 @@
 pipeline {
     agent  any
+    environment { 
+        AWS_ACCESS_KEY_ID     = credentials('aws_access_key_id') 
+        AWS_SECRET_ACCESS_KEY = credentials('aws_secret_access_key')
+    }
     stages{
         stage("stage 1")
         {
@@ -22,7 +26,7 @@ pipeline {
                  sh " terraform  apply -auto-approve"
             }
         }
-        stages("stage 5"){s
+        stages("stage 5"){
             steps{
                 echo "  this is stage 5"
             }
