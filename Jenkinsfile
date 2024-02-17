@@ -1,41 +1,31 @@
 pipeline {
-  agent  any 
-  stages {
-    stage("clean up ") {
-        steps 
+    agent  any
+    stages{
+        stage("stage 1")
         {
-           deleteDir()  
+           steps{
+            echo "this is the  pipeline"
+           }
         }
-        
+        stage("stage 2"){
+            steps{
+                  sh  " terraform  plan "
+            }
+        }
+        stage("stage 3"){
+            steps{
+                 echo  "this is terraform  apply "
+            }
+        }
+        stages("stage 4"){
+            steps{
+                 sh " terraform  apply -auto-approve"
+            }
+        }
+        stages("stage 5"){s
+            steps{
+                echo "  this is stage 5"
+            }
+        }
     }
-    stage("clone")
-     {
-        steps
-        {
-         sh  "git clone git clone https://github.com/amitvermaa93/jenkins-git-integration.git"
-        }
-    }
-    stage("build") 
-    {
-        steps{
-            dir("simple-java-maven-app")
-           {
-            sh "mvn clean install"
-           }  
-
-        }
-    } 
-    stage("test")
-    {
-        steps{
-            dir("simple-java-maven-app")
-           {
-            sh "mvn  test"
-           }  
-
-        }
-    }   
-        
-    
-  } 
 }
