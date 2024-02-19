@@ -1,35 +1,54 @@
 pipeline {
-    agent  any
-    environment { 
-        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID') 
+
+    parameters {
+        booleanParam(name: 'autoApprove', defaultValue: false, description: 'Automatically run apply after generating plan?')
+    } 
+    environment {
+        AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
     }
-    stages{
-        stage("stage 1")
-        {
-           steps{
-            echo "this is the  pipeline"
+
+   agent  any
+    stages {
+        stage('checkout') {
+            steps {
+                 script{
+                        dir("terraform")
+                        {
+                            git "https://github.com/jagadish8055/terraform-.git"
+                        }
+                    }
+                }
+            }
+
+        stage('Plan') {
+            steps {
+                sh 'pwd;cd terraform/ ; terraform init'
+                sh "pwd;cd terraform/ ; terraform plan -out tfplan"
+                sh 'pwd;cd terraform/ ; terraform show -no-color tfplan > tfplan.txt'
+            }
+        }
+        stage('Approval') {
+           when {
+               not {
+                   equals expected: true, actual: params.autoApprove
+               }
            }
-        }
-        stage("stage 2"){
-            steps{
-                  sh  " terraform  plan "
-            }
-        }
-        stage("stage 3"){
-            steps{
-                 echo  "this is terraform  apply "
-            }
-        }
-        stage("stage 4"){
-            steps{
-                 sh " terraform  apply -auto-approve"
-            }
-        }
-        stage("stage 5"){
-            steps{
-                echo "  this is stage 5"
+
+           steps {
+               script {
+                    def plan = readFile 'terraform/tfplan.txt'
+                    input message: "Do you want to apply the plan?",
+                    parameters: [text(name: 'Plan', description: 'Please review the plan', defaultValue: plan)]
+               }
+           }
+       }
+
+        stage('Apply') {
+            steps {
+                sh "pwd;cd terraform/ ; terraform apply -input=false tfplan"
             }
         }
     }
-}
+
+  }
